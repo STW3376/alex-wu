@@ -36,6 +36,10 @@ yarn-error.log*
 # vercel
 .vercel
 
+# local admin uploads (used only when Blob is not configured)
+/public/uploads/*
+!/public/uploads/.gitkeep
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

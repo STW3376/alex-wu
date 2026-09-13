@@ -1,19 +1,21 @@
 import type { Metadata } from "next";
-import { Fraunces, Nunito_Sans } from "next/font/google";
+import { Gochi_Hand, IBM_Plex_Sans } from "next/font/google";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { site } from "@/content/site";
 import "./globals.css";
 
-const fraunces = Fraunces({
+const gochi = Gochi_Hand({
   subsets: ["latin"],
-  variable: "--font-fraunces",
+  weight: "400",
+  variable: "--font-gochi",
   display: "swap",
 });
 
-const nunito = Nunito_Sans({
+const plex = IBM_Plex_Sans({
   subsets: ["latin"],
-  variable: "--font-nunito",
+  weight: ["400", "500", "600"],
+  variable: "--font-plex",
   display: "swap",
 });
 
@@ -31,17 +33,13 @@ export const metadata: Metadata = {
     template: `%s — ${site.name}`,
   },
   description: site.description,
-  robots: {
-    index: true,
-    follow: true,
-  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${fraunces.variable} ${nunito.variable} h-full scroll-smooth`}
+      className={`${gochi.variable} ${plex.variable} h-full scroll-smooth`}
     >
       <body className="flex min-h-full flex-col antialiased">
         <a

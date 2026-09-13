@@ -9,12 +9,13 @@ import type { MediaType } from "@/db/schema";
 import {
   adminConfigured,
   clearAdminSession,
+  isAdmin,
   setAdminSession,
   verifyAdminSecret,
-  isAdmin,
 } from "@/lib/admin";
-import { isHttpUrl, parseMediaUrls } from "@/lib/media";
+import { inferMediaType, isMediaRef, parseMediaUrls } from "@/lib/media";
 import { slugify, uniqueSlug } from "@/lib/slug";
+import { saveWorkFiles } from "@/lib/storage";
 
 const mediaTypes: MediaType[] = [
   "image",
@@ -58,12 +59,15 @@ export async function addWork(formData: FormData) {
 
   const title = String(formData.get("title") ?? "").trim();
   const category = String(formData.get("category") ?? "");
-  const mediaType = String(formData.get("mediaType") ?? "");
+  const requestedType = String(formData.get("mediaType") ?? "").trim();
   const description = String(formData.get("description") ?? "").trim();
   const yearRaw = String(formData.get("year") ?? "").trim();
   const sortRaw = String(formData.get("sortOrder") ?? "").trim();
   const requestedSlug = String(formData.get("slug") ?? "").trim();
-  const urls = parseMediaUrls(String(formData.get("mediaUrls") ?? ""));
+  const pasted = parseMediaUrls(String(formData.get("mediaUrls") ?? ""));
+  const files = formData
+    .getAll("files")
+    .filter((value): value is File => value instanceof File && value.size > 0);
 
   if (!title) {
     return { error: "A title is required." };
@@ -71,12 +75,27 @@ export async function addWork(formData: FormData) {
   if (!isCategory(category)) {
     return { error: "Pick a studio room." };
   }
-  if (!isMediaType(mediaType)) {
-    return { error: "Pick a media type." };
+  if (pasted.some((url) => !isMediaRef(url))) {
+    return { error: "Links need to start with http, https, or /." };
   }
-  if (urls.some((url) => !isHttpUrl(url))) {
-    return { error: "Every media line needs to be an http or https link." };
+
+  let uploaded: string[] = [];
+  try {
+    uploaded = await saveWorkFiles(files);
+  } catch (error) {
+    return {
+      error: error instanceof Error ? error.message : "The files could not be saved.",
+    };
   }
+
+  const urls = [...uploaded, ...pasted];
+  if (urls.length === 0) {
+    return { error: "Add a file, or paste a link in Advanced." };
+  }
+
+  const mediaType = isMediaType(requestedType)
+    ? requestedType
+    : inferMediaType(urls);
 
   let year: number | null = null;
   if (yearRaw) {

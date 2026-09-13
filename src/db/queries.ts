@@ -71,6 +71,7 @@ export async function countWorksByCategory() {
       comics: 0,
       inventions: 0,
       crafts: 0,
+      photography: 0,
     },
   );
 }

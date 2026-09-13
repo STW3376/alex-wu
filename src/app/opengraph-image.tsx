@@ -14,18 +14,16 @@ export default function OpenGraphImage() {
           display: "flex",
           flexDirection: "column",
           justifyContent: "space-between",
-          background: "#f3ead9",
-          color: "#241c16",
+          background: "#f4efe2",
+          color: "#161310",
           padding: 72,
         }}
       >
-        <div style={{ fontSize: 22, letterSpacing: 6, textTransform: "uppercase" }}>
-          Studio
-        </div>
-        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-          <div style={{ fontSize: 96, lineHeight: 0.9 }}>{site.name}</div>
-          <div style={{ fontSize: 28, maxWidth: 720, color: "#6a5c4f" }}>
-            Drawings, animations, music, comics, inventions, and crafts.
+        <div style={{ fontSize: 28, color: "#a7b0b4" }}>studio</div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+          <div style={{ fontSize: 110, lineHeight: 0.9 }}>{site.name}</div>
+          <div style={{ fontSize: 28, color: "#5c564c" }}>
+            drawings · animations · photographs
           </div>
         </div>
       </div>

@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { CategoryMark } from "@/components/category-mark";
 import { WorkGrid } from "@/components/work-grid";
-import { accentClass, categories, isCategory } from "@/content/categories";
+import { categories, isCategory } from "@/content/categories";
 import { listWorksByCategory } from "@/db/queries";
 
 export const dynamic = "force-dynamic";
@@ -41,23 +40,11 @@ export default async function CategoryPage({
   const works = await listWorksByCategory(slug);
 
   return (
-    <div className="mx-auto max-w-6xl px-5 py-12 sm:px-8 sm:py-16">
-      <header className={`${accentClass[category.accent]} max-w-2xl space-y-4`}>
-        <CategoryMark
-          category={category.slug}
-          className="h-12 w-12 text-[color:var(--accent)]"
-        />
-        <p className="text-[0.72rem] font-semibold tracking-[0.28em] text-ink-soft uppercase">
-          Studio room
-        </p>
-        <h1 className="font-display text-5xl leading-none sm:text-6xl">
-          {category.label}
-        </h1>
-        <p className="text-lg text-ink-soft">{category.invitation}</p>
+    <div className="mx-auto max-w-6xl px-5 pb-16 sm:px-8">
+      <header className="mb-10">
+        <h1 className="font-display text-6xl">{category.label}</h1>
       </header>
-      <div className="mt-12">
-        <WorkGrid works={works} />
-      </div>
+      <WorkGrid works={works} variant={category.variant} />
     </div>
   );
 }

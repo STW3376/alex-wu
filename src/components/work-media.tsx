@@ -80,7 +80,7 @@ export function WorkMedia({ work }: { work: Work }) {
       <img
         src={urls[0]}
         alt={workAlt(work)}
-        className="mx-auto max-h-[80vh] w-full object-contain"
+        className="mx-auto max-h-[85vh] w-full bg-paper object-contain"
       />
     </figure>
   );

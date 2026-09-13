@@ -25,6 +25,10 @@ const marks: Record<Category, { label: string; path: string }> = {
     label: "Crafts mark",
     path: "M12 40c0-12 8-22 20-22s20 10 20 22H12Zm10-22 2-8h16l2 8M24 46h16v6H24z",
   },
+  photography: {
+    label: "Photography mark",
+    path: "M12 22h8l4-6h16l4 6h8v24H12V22Zm20 6a8 8 0 1 0 .01 0Z",
+  },
 };
 
 export function CategoryMark({

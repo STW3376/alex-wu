@@ -11,6 +11,10 @@ export function isHttpUrl(value: string) {
   }
 }
 
+export function isMediaRef(value: string) {
+  return isHttpUrl(value) || value.startsWith("/");
+}
+
 export function parseMediaUrls(raw: string) {
   return raw
     .split(/\r?\n/)
@@ -87,4 +91,20 @@ export function videoSrc(urls: string[]) {
 
 export function posterSrc(urls: string[]) {
   return urls.find((url) => looksLikeImage(url));
+}
+
+export function inferMediaType(urls: string[]) {
+  if (urls.some((url) => isEmbeddableVideo(url))) {
+    return "video_embed" as const;
+  }
+  if (urls.some((url) => looksLikeVideo(url))) {
+    return "video" as const;
+  }
+  if (urls.some((url) => looksLikeAudio(url))) {
+    return "audio" as const;
+  }
+  if (urls.filter((url) => looksLikeImage(url)).length > 1) {
+    return "images" as const;
+  }
+  return "image" as const;
 }

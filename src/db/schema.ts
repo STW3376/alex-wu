@@ -16,6 +16,7 @@ export const categoryEnum = pgEnum("category", [
   "comics",
   "inventions",
   "crafts",
+  "photography",
 ]);
 
 export const mediaTypeEnum = pgEnum("media_type", [
