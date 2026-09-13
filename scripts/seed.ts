@@ -1,6 +1,7 @@
 import { config } from "dotenv";
+import { catalogWorks } from "../src/content/catalog";
 import { getDb } from "../src/db";
-import { works } from "../src/db/schema";
+import { upsertWorkBySlug } from "../src/db/queries";
 
 config({ path: ".env.local" });
 config({ path: ".env" });
@@ -12,14 +13,12 @@ async function seed() {
     process.exit(0);
   }
 
-  const existing = await db.select({ id: works.id }).from(works).limit(1);
-  if (existing.length > 0) {
-    console.log("Works already exist. Seed inserts nothing.");
-    return;
+  for (const work of catalogWorks) {
+    const { credit, ...values } = work;
+    void credit;
+    await upsertWorkBySlug(values);
+    console.log(`Seeded ${work.title}`);
   }
-
-  // Intentionally insert zero artworks. Real pieces get added from /admin.
-  console.log("Seed complete. The works table is empty and ready for real pieces.");
 }
 
 seed().catch((error) => {

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { WorkMedia } from "@/components/work-media";
 import { categoryBySlug } from "@/content/categories";
+import { workCredit } from "@/content/catalog";
 import { getWorkBySlug } from "@/db/queries";
 
 export const dynamic = "force-dynamic";
@@ -31,6 +32,7 @@ export default async function WorkPage({
   }
 
   const category = categoryBySlug[work.category];
+  const credit = workCredit(work.slug);
 
   return (
     <article className="mx-auto max-w-5xl px-5 py-12 sm:px-8 sm:py-16">
@@ -39,6 +41,7 @@ export default async function WorkPage({
           {category.label}
         </Link>
         {work.year ? ` · ${work.year}` : ""}
+        {credit ? ` · ${credit}` : ""}
       </p>
       <h1 className="font-display mt-3 text-5xl leading-tight sm:text-6xl">
         {work.title}

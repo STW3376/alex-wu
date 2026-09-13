@@ -80,3 +80,11 @@ export function embedSrc(url: string) {
 export function isEmbeddableVideo(url: string) {
   return Boolean(youtubeId(url) || vimeoId(url));
 }
+
+export function videoSrc(urls: string[]) {
+  return urls.find((url) => looksLikeVideo(url)) ?? urls[0];
+}
+
+export function posterSrc(urls: string[]) {
+  return urls.find((url) => looksLikeImage(url));
+}

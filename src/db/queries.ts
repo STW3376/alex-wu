@@ -1,4 +1,5 @@
 import { asc, desc, eq } from "drizzle-orm";
+import { featuredSlug } from "@/content/catalog";
 import { getDb } from "./index";
 import { type Category, type NewWork, works } from "./schema";
 
@@ -87,4 +88,34 @@ export async function insertWork(values: NewWork) {
 
   const [created] = await db.insert(works).values(values).returning();
   return created;
+}
+
+export async function upsertWorkBySlug(values: NewWork) {
+  const db = getDb();
+  if (!db) {
+    throw new Error("DATABASE_URL is not set.");
+  }
+
+  const [saved] = await db
+    .insert(works)
+    .values(values)
+    .onConflictDoUpdate({
+      target: works.slug,
+      set: {
+        title: values.title,
+        category: values.category,
+        description: values.description,
+        year: values.year,
+        mediaType: values.mediaType,
+        mediaUrls: values.mediaUrls,
+        sortOrder: values.sortOrder,
+      },
+    })
+    .returning();
+
+  return saved;
+}
+
+export async function getFeaturedWork() {
+  return getWorkBySlug(featuredSlug);
 }

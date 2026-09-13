@@ -1,6 +1,7 @@
 import type { Work } from "@/db/schema";
-import { embedSrc } from "@/lib/media";
+import { embedSrc, posterSrc, videoSrc } from "@/lib/media";
 import { ComicReader } from "./comic-reader";
+import { LoopingVideo } from "./looping-video";
 
 export function WorkMedia({ work }: { work: Work }) {
   const urls = work.mediaUrls.filter(Boolean);
@@ -41,13 +42,12 @@ export function WorkMedia({ work }: { work: Work }) {
   }
 
   if (work.mediaType === "video" || work.mediaType === "video_embed") {
-    const url = urls[0];
     if (work.mediaType === "video_embed") {
       return (
         <div className="paper-card hairline overflow-hidden">
           <div className="relative aspect-video bg-ink">
             <iframe
-              src={embedSrc(url)}
+              src={embedSrc(urls[0])}
               title={work.title}
               className="absolute inset-0 h-full w-full"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -60,14 +60,11 @@ export function WorkMedia({ work }: { work: Work }) {
 
     return (
       <div className="paper-card hairline overflow-hidden bg-ink">
-        <video
-          controls
-          preload="metadata"
-          src={url}
-          className="mx-auto max-h-[80vh] w-full"
-        >
-          Your browser cannot play this video.
-        </video>
+        <LoopingVideo
+          src={videoSrc(urls)}
+          poster={posterSrc(urls)}
+          title={work.title}
+        />
       </div>
     );
   }

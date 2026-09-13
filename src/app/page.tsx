@@ -1,10 +1,13 @@
 import { CategoryCard } from "@/components/category-card";
+import { FeaturedWork } from "@/components/featured-work";
 import { categories } from "@/content/categories";
 import { site } from "@/content/site";
+import { getFeaturedWork } from "@/db/queries";
 
 export const dynamic = "force-dynamic";
 
-export default function HomePage() {
+export default async function HomePage() {
+  const featured = await getFeaturedWork();
   const [drawings, animations, music, comics, inventions, crafts] = categories;
 
   return (
@@ -23,13 +26,16 @@ export default function HomePage() {
         </p>
       </section>
 
+      {featured ? <FeaturedWork work={featured} /> : null}
+
       <section className="mt-16" aria-labelledby="studio-index">
         <div className="mb-6 flex items-end justify-between gap-4">
           <h2 id="studio-index" className="font-display text-3xl">
             Six rooms
           </h2>
           <p className="max-w-sm text-sm text-ink-soft">
-            Pick a room. Empty shelves stay empty until a real piece is ready.
+            One film is up. The other shelves stay empty until a real piece is
+            ready.
           </p>
         </div>
         <div className="grid gap-5 md:grid-cols-6">

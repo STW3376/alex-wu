@@ -20,7 +20,8 @@ export const categories: CategoryMeta[] = [
     slug: "animations",
     label: "Animations",
     phrase: "Pictures that learned how to move.",
-    invitation: "Short films and moving drawings will play here.",
+    invitation:
+      "Short films and moving drawings. The first one is already on the wall.",
     accent: "gold",
   },
   {

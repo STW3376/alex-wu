@@ -1,12 +1,16 @@
 import Link from "next/link";
 import { categoryBySlug } from "@/content/categories";
 import type { Work } from "@/db/schema";
+import { posterSrc } from "@/lib/media";
 
 export function WorkCard({ work }: { work: Work }) {
   const category = categoryBySlug[work.category];
-  const preview = work.mediaUrls[0];
+  const poster = posterSrc(work.mediaUrls);
   const showImage =
-    preview && (work.mediaType === "image" || work.mediaType === "images");
+    poster &&
+    (work.mediaType === "image" ||
+      work.mediaType === "images" ||
+      work.mediaType === "video");
 
   return (
     <article>
@@ -15,11 +19,11 @@ export function WorkCard({ work }: { work: Work }) {
         className="paper-card hairline group block overflow-hidden transition-transform motion-safe:hover:-translate-y-0.5"
       >
         <div className="relative aspect-[4/3] bg-paper-deep">
-          {showImage ? (
+          {showImage && poster ? (
             // User-supplied remote URLs can come from any host.
             // eslint-disable-next-line @next/next/no-img-element
             <img
-              src={preview}
+              src={poster}
               alt={work.title}
               className="h-full w-full object-cover"
             />
