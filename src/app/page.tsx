@@ -18,11 +18,13 @@ export default async function HomePage() {
             <WorkCard work={lute} featured />
           </div>
         ) : null}
-        <div className="grid gap-8 sm:grid-cols-2 lg:col-span-5 lg:grid-cols-1">
+        <div className="grid gap-8 lg:col-span-5">
           {film ? <WorkCard work={film} variant="time" /> : null}
-          {others.map((work) => (
-            <WorkCard key={work.id} work={work} />
-          ))}
+          <div className="grid gap-8 sm:grid-cols-2">
+            {others.map((work) => (
+              <WorkCard key={work.id} work={work} />
+            ))}
+          </div>
         </div>
       </section>
     </div>
