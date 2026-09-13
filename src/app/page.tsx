@@ -34,8 +34,8 @@ export default async function HomePage() {
             Six rooms
           </h2>
           <p className="max-w-sm text-sm text-ink-soft">
-            One film is up. The other shelves stay empty until a real piece is
-            ready.
+            A film and three drawings are up. Music, comics, inventions, and
+            crafts stay empty until more real work is ready.
           </p>
         </div>
         <div className="grid gap-5 md:grid-cols-6">

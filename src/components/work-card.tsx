@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { categoryBySlug } from "@/content/categories";
+import { workAlt, workSubtitle } from "@/content/catalog";
 import type { Work } from "@/db/schema";
 import { posterSrc } from "@/lib/media";
 
@@ -24,7 +25,7 @@ export function WorkCard({ work }: { work: Work }) {
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={poster}
-              alt={work.title}
+              alt={workAlt(work)}
               className="h-full w-full object-cover"
             />
           ) : (
@@ -47,6 +48,9 @@ export function WorkCard({ work }: { work: Work }) {
           <h2 className="font-display text-2xl leading-tight group-hover:underline">
             {work.title}
           </h2>
+          {workSubtitle(work.slug) ? (
+            <p className="text-sm text-ink-soft">{workSubtitle(work.slug)}</p>
+          ) : null}
           {work.description ? (
             <p className="line-clamp-2 text-sm text-ink-soft">{work.description}</p>
           ) : null}

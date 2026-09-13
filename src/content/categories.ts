@@ -13,7 +13,7 @@ export const categories: CategoryMeta[] = [
     slug: "drawings",
     label: "Drawings",
     phrase: "Pencil, marker, and whatever was on the desk.",
-    invitation: "Pages from the sketch pile — when a drawing is ready, it lands here.",
+    invitation: "Pages from the sketch pile. Three drawings are on the wall.",
     accent: "clay",
   },
   {

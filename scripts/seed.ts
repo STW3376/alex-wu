@@ -14,8 +14,10 @@ async function seed() {
   }
 
   for (const work of catalogWorks) {
-    const { credit, ...values } = work;
+    const { credit, subtitle, alt, ...values } = work;
     void credit;
+    void subtitle;
+    void alt;
     await upsertWorkBySlug(values);
     console.log(`Seeded ${work.title}`);
   }

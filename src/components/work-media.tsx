@@ -1,3 +1,4 @@
+import { workAlt } from "@/content/catalog";
 import type { Work } from "@/db/schema";
 import { embedSrc, posterSrc, videoSrc } from "@/lib/media";
 import { ComicReader } from "./comic-reader";
@@ -78,7 +79,7 @@ export function WorkMedia({ work }: { work: Work }) {
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={urls[0]}
-        alt={work.title}
+        alt={workAlt(work)}
         className="mx-auto max-h-[80vh] w-full object-contain"
       />
     </figure>

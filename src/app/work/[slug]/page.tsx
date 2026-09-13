@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { WorkMedia } from "@/components/work-media";
 import { categoryBySlug } from "@/content/categories";
-import { workCredit } from "@/content/catalog";
+import { workAlt, workCredit, workSubtitle } from "@/content/catalog";
 import { getWorkBySlug } from "@/db/queries";
 
 export const dynamic = "force-dynamic";
@@ -18,7 +18,10 @@ export async function generateMetadata({
   }
   return {
     title: work.title,
-    description: work.description ?? `${work.title} by Alex Wu`,
+    description:
+      work.description ??
+      workSubtitle(work.slug) ??
+      workAlt(work),
   };
 }
 
@@ -46,6 +49,9 @@ export default async function WorkPage({
       <h1 className="font-display mt-3 text-5xl leading-tight sm:text-6xl">
         {work.title}
       </h1>
+      {workSubtitle(work.slug) ? (
+        <p className="mt-3 text-xl text-ink-soft">{workSubtitle(work.slug)}</p>
+      ) : null}
       {work.description ? (
         <p className="mt-5 max-w-2xl text-lg leading-relaxed text-ink-soft">
           {work.description}

@@ -37,7 +37,7 @@ The site is a Next.js App Router app. Portfolio pieces live in Neon Postgres. Te
    npm run db:seed
    ```
 
-   The seed upserts Alex’s real pieces from `src/content/catalog.ts`. Right now that is one animation: *The Entire Observable Seal*. The other rooms stay empty until more real work is added.
+   The seed upserts Alex’s real pieces from `src/content/catalog.ts`: *The Entire Observable Seal*, *The Wizard*, *Golden Lute*, and *祖*. Music, comics, inventions, and crafts stay empty.
 
 5. Run the site:
 
