@@ -2,43 +2,64 @@
 
 import { upload } from "@vercel/blob/client";
 import { useActionState, useState } from "react";
-import { addWork, lockStudio, unlockStudio } from "@/app/admin/actions";
+import {
+  addWork,
+  changeStudioPassword,
+  lockStudio,
+} from "@/app/admin/actions";
 import { categories } from "@/content/categories";
 import { parseMediaUrls } from "@/lib/media";
 
-type ActionState = { error?: string } | void;
+type ActionState = { error?: string; ok?: boolean } | undefined;
 
 const initialState: ActionState = undefined;
 
-export function UnlockForm() {
+export function ChangePasswordForm() {
   const [state, action, pending] = useActionState(
-    async (_state: ActionState, formData: FormData) => unlockStudio(formData),
+    async (_state: ActionState, formData: FormData): Promise<ActionState> =>
+      changeStudioPassword(formData),
     initialState,
   );
 
   return (
-    <form action={action} className="mx-auto max-w-md space-y-4">
+    <form action={action} className="max-w-md space-y-4">
       <label className="block space-y-2">
-        <span className="text-sm">Studio secret</span>
+        <span className="text-sm">Current password</span>
         <input
           type="password"
-          name="secret"
+          name="currentPassword"
           autoComplete="current-password"
           required
           className="w-full border border-rule bg-paper px-3 py-2"
         />
       </label>
-      {state?.error ? (
+      <label className="block space-y-2">
+        <span className="text-sm">New password</span>
+        <input
+          type="password"
+          name="newPassword"
+          autoComplete="new-password"
+          minLength={10}
+          required
+          className="w-full border border-rule bg-paper px-3 py-2"
+        />
+      </label>
+      {state && "error" in state && state.error ? (
         <p className="text-sm text-clay" role="alert">
           {state.error}
+        </p>
+      ) : null}
+      {state && "ok" in state && state.ok ? (
+        <p className="text-sm text-teal" role="status">
+          Password saved.
         </p>
       ) : null}
       <button
         type="submit"
         disabled={pending}
-        className="w-full bg-ink px-4 py-2 text-paper disabled:opacity-60"
+        className="border border-rule px-4 py-2 disabled:opacity-60"
       >
-        {pending ? "Checking…" : "Unlock the desk"}
+        {pending ? "Saving…" : "Change password"}
       </button>
     </form>
   );
@@ -47,7 +68,7 @@ export function UnlockForm() {
 export function AddWorkForm({ blobReady }: { blobReady: boolean }) {
   const [advanced, setAdvanced] = useState(false);
   const [state, action, pending] = useActionState(
-    async (_state: ActionState, formData: FormData) => {
+    async (_state: ActionState, formData: FormData): Promise<ActionState> => {
       const files = formData
         .getAll("files")
         .filter((value): value is File => value instanceof File && value.size > 0);
