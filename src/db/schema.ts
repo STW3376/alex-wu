@@ -27,6 +27,20 @@ export const mediaTypeEnum = pgEnum("media_type", [
   "audio",
 ]);
 
+export const adminUsers = pgTable("admin_users", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  username: varchar("username", { length: 32 }).notNull().unique(),
+  passwordHash: text("password_hash").notNull(),
+  failedAttempts: integer("failed_attempts").notNull().default(0),
+  lockedUntil: timestamp("locked_until", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
 export const works = pgTable(
   "works",
   {
@@ -51,5 +65,7 @@ export const works = pgTable(
 
 export type Work = typeof works.$inferSelect;
 export type NewWork = typeof works.$inferInsert;
+export type AdminUser = typeof adminUsers.$inferSelect;
+export type NewAdminUser = typeof adminUsers.$inferInsert;
 export type Category = (typeof categoryEnum.enumValues)[number];
 export type MediaType = (typeof mediaTypeEnum.enumValues)[number];

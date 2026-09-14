@@ -25,8 +25,10 @@ Pieces live in Neon Postgres. Files uploaded from `/admin` are stored in Vercel 
    | Variable | What it is |
    | --- | --- |
    | `DATABASE_URL` | Neon connection string. A pooled URL is fine. |
-   | `ADMIN_SECRET` | Long random phrase. Unlocks `/admin`. |
+   | `ADMIN_SESSION_SECRET` | Long random string that signs the `/admin` cookie. Generate with `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`. |
    | `BLOB_READ_WRITE_TOKEN` | Vercel Blob token. Required on Vercel. Local `/admin` can save files to `public/uploads` without it. |
+
+   Password env vars (`ADMIN_TED_PASSWORD`, `ADMIN_ALEX_PASSWORD`) are only for the one-shot script below. They are not required on Vercel.
 
    A Neon project named **alex-wu** already exists in the [Neon console](https://console.neon.tech). Never commit `.env.local`.
 
@@ -40,7 +42,23 @@ Pieces live in Neon Postgres. Files uploaded from `/admin` are stored in Vercel 
 
    The seed upserts four real pieces from `src/content/catalog.ts`: *The Entire Observable Seal*, *The Wizard*, *Golden Lute*, and *祖*. Music, comics, inventions, crafts, and photography stay empty.
 
-5. Run the site:
+5. Set the two desk logins (hashes only go into Neon; nothing is stored in git):
+
+   ```bash
+   # Put the real passwords in your shell env or .env.local, then:
+   npm run db:set-admin-passwords
+   ```
+
+   If one of those env vars is missing, that user is skipped. You can also set one person at a time:
+
+   ```bash
+   npm run db:set-admin-passwords -- ted
+   npm run db:set-admin-passwords -- alex
+   ```
+
+   Those commands read `ADMIN_TED_PASSWORD` / `ADMIN_ALEX_PASSWORD`. You may pass the password as a second CLI argument instead. Do not put real passwords in the repo, in README examples that get committed, or in Vercel env vars after the hashes are in Neon.
+
+6. Run the site:
 
    ```bash
    npm run dev
@@ -51,9 +69,12 @@ Pieces live in Neon Postgres. Files uploaded from `/admin` are stored in Vercel 
 ## Adding a piece
 
 1. On Vercel, create a Blob store for the project so `BLOB_READ_WRITE_TOKEN` is set.
-2. Visit `/admin` and enter `ADMIN_SECRET`.
+2. Visit `/admin` and sign in as `ted` or `alex` (lowercase usernames).
 3. Title, room, optional year and description, then upload files. Comics: several images, one per page.
 4. Paste-URL is under Advanced, not the main path.
+5. Use **Change password** on the desk to rotate a password. That writes a new hash to Neon.
+
+`/admin` is private: `noindex`, blocked in `robots.ts`, and the upload form is not sent until someone is signed in. After five failed sign-ins, that username is locked for 15 minutes. Sessions last 7 days.
 
 The short About text lives in `src/content/site.ts`.
 
@@ -63,10 +84,11 @@ The short About text lives in `src/content/site.ts`.
 2. Framework preset: Next.js. Build command: `npm run build`.
 3. Add environment variables:
    - `DATABASE_URL`
-   - `ADMIN_SECRET`
+   - `ADMIN_SESSION_SECRET`
    - `BLOB_READ_WRITE_TOKEN` (from a Blob store on the project)
 4. Deploy.
 5. Run migrations once against the same Neon database (`npm run db:migrate`).
+6. From your laptop, with `DATABASE_URL` pointing at that Neon database, set the two passwords with `npm run db:set-admin-passwords` as above. You can remove the old `ADMIN_SECRET` from Vercel; it is no longer used.
 
 No secrets belong in the repo.
 
@@ -83,3 +105,4 @@ No home address, school name, contact form, or child’s email. The footer says:
 | `npm run db:generate` | Create a new Drizzle migration after schema changes |
 | `npm run db:migrate` | Apply migrations to Neon |
 | `npm run db:seed` | Upsert the four real catalog pieces |
+| `npm run db:set-admin-passwords` | Hash `ADMIN_TED_PASSWORD` / `ADMIN_ALEX_PASSWORD` (or CLI args) and store them in Neon |

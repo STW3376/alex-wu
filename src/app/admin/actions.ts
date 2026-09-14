@@ -7,11 +7,10 @@ import { getDatabaseUrl } from "@/db";
 import { insertWork, slugExists } from "@/db/queries";
 import type { MediaType } from "@/db/schema";
 import {
-  adminConfigured,
+  changeOwnPassword,
   clearAdminSession,
   isAdmin,
-  setAdminSession,
-  verifyAdminSecret,
+  loginWithPassword,
 } from "@/lib/admin";
 import { inferMediaType, isMediaRef, parseMediaUrls } from "@/lib/media";
 import { slugify, uniqueSlug } from "@/lib/slug";
@@ -29,18 +28,12 @@ function isMediaType(value: string): value is MediaType {
   return mediaTypes.includes(value as MediaType);
 }
 
-export async function unlockStudio(formData: FormData) {
-  if (!adminConfigured()) {
-    return { error: "ADMIN_SECRET is not set on this deployment." };
-  }
-
-  const secret = String(formData.get("secret") ?? "");
-  if (!verifyAdminSecret(secret)) {
-    return { error: "That secret did not match." };
-  }
-
-  await setAdminSession();
-  redirect("/admin");
+export async function signInStudio(
+  formData: FormData,
+): Promise<{ error: string } | undefined> {
+  const username = String(formData.get("username") ?? "");
+  const password = String(formData.get("password") ?? "");
+  return loginWithPassword(username, password);
 }
 
 export async function lockStudio() {
@@ -48,7 +41,17 @@ export async function lockStudio() {
   redirect("/admin");
 }
 
-export async function addWork(formData: FormData) {
+export async function changeStudioPassword(
+  formData: FormData,
+): Promise<{ error: string } | { ok: true }> {
+  const currentPassword = String(formData.get("currentPassword") ?? "");
+  const newPassword = String(formData.get("newPassword") ?? "");
+  return changeOwnPassword(currentPassword, newPassword);
+}
+
+export async function addWork(
+  formData: FormData,
+): Promise<{ error: string } | undefined> {
   if (!(await isAdmin())) {
     return { error: "The studio desk is locked." };
   }
