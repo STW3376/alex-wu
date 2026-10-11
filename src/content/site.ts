@@ -2,7 +2,7 @@ export const site = {
   name: "Alex Wu",
   title: "Alex Wu",
   description:
-    "Drawings, animations, music, comics, inventions, crafts, and photography by Alex Wu.",
+    "Drawings, animations, music, comics, inventions, crafts, photography, and games by Alex Wu.",
   about:
     "A paper studio for the things Alex makes. New work shows up when it is ready. Nothing here is a contest.",
   contact: "Want to say hi? Ask a parent to reach out.",

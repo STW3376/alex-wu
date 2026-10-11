@@ -13,7 +13,7 @@ export function SiteHeader() {
         <SealMark className="mb-2 h-7 w-12 text-seal" />
       </div>
       <nav
-        aria-label="Studio rooms"
+        aria-label="Studio"
         className="mx-auto mt-5 flex max-w-6xl flex-wrap gap-x-4 gap-y-2 px-5 pb-6 sm:px-8"
       >
         {categories.map((category) => (
@@ -25,6 +25,9 @@ export function SiteHeader() {
             {category.label}
           </Link>
         ))}
+        <Link href="/games" className="font-display text-xl text-ink-soft hover:text-ink">
+          Games
+        </Link>
       </nav>
     </header>
   );
