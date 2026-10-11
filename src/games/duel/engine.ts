@@ -264,7 +264,8 @@ export class DuelEngine {
   private readonly landmineRechargeSeconds = 15;
   private landmineRechargeQueue: number[] = [];
 
-  money = 937830623970;
+  // Alex's .py starts at $937,830,623,970 (a test value); the web version starts at $0 so players earn money.
+  money = 0;
   levelIndex = 0;
   private owned = new Set<string>(["pistol"]);
   unlockedChunkier = false;
