@@ -104,6 +104,185 @@ body::before {
   --accent: var(--seal-deep);
 }
 
+.home-stage {
+  position: relative;
+  display: grid;
+  width: min(100%, 980px);
+  margin-inline: auto;
+  align-items: center;
+  justify-items: center;
+  gap: 0.35rem 0.4rem;
+  padding-top: 2.25rem;
+  grid-template-columns: 1fr 1fr;
+  grid-template-areas:
+    "musics me"
+    "animation animation"
+    "face face"
+    "hand hand"
+    "arts games";
+}
+
+.area-musics { grid-area: musics; }
+.area-me { grid-area: me; }
+.area-animation { grid-area: animation; }
+.area-face { grid-area: face; }
+.area-hand { grid-area: hand; }
+.area-arts { grid-area: arts; }
+.area-games { grid-area: games; }
+
+.home-bubble {
+  position: relative;
+  display: grid;
+  width: min(100%, 11rem);
+  place-items: center;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.area-animation {
+  width: min(100%, 13.5rem);
+}
+
+.area-musics { transform: rotate(-7deg); }
+.area-me { transform: rotate(4deg); }
+.area-animation { transform: rotate(6deg); }
+.area-arts { transform: rotate(-5deg); }
+.area-games { transform: rotate(3deg); }
+
+.home-bubble-ink {
+  position: relative;
+  display: grid;
+  width: 100%;
+  place-items: center;
+  transform-origin: center;
+}
+
+.home-bubble-ink span {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding-inline: 14%;
+  text-align: center;
+  font-size: clamp(1.35rem, 4.6vw, 2rem);
+  line-height: 0.9;
+  pointer-events: none;
+}
+
+.area-animation .home-bubble-ink span {
+  font-size: clamp(1.2rem, 4vw, 1.7rem);
+}
+
+.home-bubble:hover,
+.home-bubble:focus-visible {
+  color: var(--gold);
+}
+
+.home-bubble:hover .home-bubble-ink,
+.home-bubble:focus-visible .home-bubble-ink {
+  animation: home-wiggle 0.55s ease-in-out infinite;
+}
+
+.area-face {
+  width: min(100%, 22rem);
+  color: var(--ink);
+}
+
+.area-hand {
+  width: min(46%, 8.5rem);
+  color: var(--ink);
+}
+
+.home-hand {
+  display: block;
+  width: 100%;
+  height: auto;
+  transform-origin: 50% 92%;
+  animation: home-wave 2.2s ease-in-out infinite;
+}
+
+.home-doodle {
+  position: absolute;
+  top: 0;
+  right: 0.15rem;
+  width: 2.4rem;
+  color: var(--ink);
+  pointer-events: none;
+}
+
+.home-doodle-sway {
+  transform-origin: 50% 20%;
+  animation: home-sway 3.4s ease-in-out infinite;
+}
+
+@keyframes home-wiggle {
+  0%,
+  100% {
+    transform: rotate(-2.5deg);
+  }
+  50% {
+    transform: rotate(3deg);
+  }
+}
+
+@keyframes home-wave {
+  0%,
+  100% {
+    transform: rotate(-12deg);
+  }
+  50% {
+    transform: rotate(14deg);
+  }
+}
+
+@keyframes home-sway {
+  0%,
+  100% {
+    transform: rotate(-4deg);
+  }
+  50% {
+    transform: rotate(5deg);
+  }
+}
+
+@media (min-width: 768px) {
+  .home-stage {
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.45fr) minmax(0, 0.95fr);
+    grid-template-areas:
+      "musics me animation"
+      ". face ."
+      "arts games hand";
+    gap: 0.15rem 0.75rem;
+    padding-top: 1.25rem;
+  }
+
+  .home-bubble {
+    width: min(100%, 12.5rem);
+  }
+
+  .area-animation {
+    width: min(100%, 14.5rem);
+  }
+
+  .area-face {
+    width: min(100%, 30rem);
+    margin-top: -0.5rem;
+    margin-bottom: -0.75rem;
+  }
+
+  .area-hand {
+    width: min(100%, 13rem);
+    justify-self: start;
+    align-self: end;
+    margin-bottom: 0.25rem;
+  }
+
+  .home-doodle {
+    width: 3rem;
+    right: 0.4rem;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
