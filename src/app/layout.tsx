@@ -48,10 +48,12 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         >
           Skip to work
         </a>
-        <SiteHeader />
-        <main id="main" className="flex-1">
-          {children}
-        </main>
+        <div className="site-shell flex min-h-0 flex-1 flex-col">
+          <SiteHeader />
+          <main id="main" className="flex min-h-0 flex-1 flex-col">
+            {children}
+          </main>
+        </div>
         <SiteFooter />
       </body>
     </html>
