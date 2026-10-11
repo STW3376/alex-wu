@@ -197,8 +197,9 @@ body::before {
   display: block;
   width: 100%;
   height: auto;
-  transform-origin: 50% 92%;
-  animation: home-wave 2.2s ease-in-out infinite;
+  transform-box: view-box;
+  transform-origin: 50% 97%;
+  animation: home-wave 5.6s ease-in-out infinite;
 }
 
 .home-doodle {
@@ -227,11 +228,27 @@ body::before {
 
 @keyframes home-wave {
   0%,
+  42%,
   100% {
+    transform: rotate(0deg);
+  }
+  5% {
+    transform: rotate(-18deg);
+  }
+  11% {
+    transform: rotate(18deg);
+  }
+  17% {
+    transform: rotate(-16deg);
+  }
+  23% {
+    transform: rotate(16deg);
+  }
+  29% {
     transform: rotate(-12deg);
   }
-  50% {
-    transform: rotate(14deg);
+  35% {
+    transform: rotate(10deg);
   }
 }
 
@@ -291,5 +308,10 @@ body::before {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+
+  .home-hand {
+    animation: none !important;
+    transform: none !important;
   }
 }

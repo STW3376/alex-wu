@@ -205,16 +205,47 @@ function SmileyFace() {
 }
 
 function WavingHand() {
+  const ink = {
+    fill: "#f4efe2",
+    stroke: "currentColor",
+    strokeWidth: 2.7,
+    strokeLinejoin: "round" as const,
+    strokeLinecap: "round" as const,
+  };
+
   return (
     <div className="area-hand" aria-hidden="true">
-      <svg viewBox="0 0 250 270" className="home-hand">
+      <svg viewBox="0 0 240 310" className="home-hand">
         <path
-          d="M92 236C74 204 50 178 42 150C30 118 50 104 68 120C76 128 80 148 86 164C84 118 90 74 108 66C124 58 136 92 132 146C136 96 150 52 168 50C186 48 196 86 190 148C196 112 214 78 230 86C244 94 236 140 220 168C236 176 240 206 214 226C176 256 118 258 92 236Z"
-          fill="#f4efe2"
+          d="M72 188C56 206 50 242 68 268C88 296 156 302 184 274C206 250 208 210 192 186C174 164 98 162 72 188Z"
+          {...ink}
+        />
+        <path
+          d="M88 258C84 278 92 300 120 304C148 300 156 278 152 258"
+          fill="none"
           stroke="currentColor"
-          strokeWidth="3"
-          strokeLinejoin="round"
+          strokeWidth="2.7"
           strokeLinecap="round"
+        />
+        <path
+          d="M64 198C40 186 22 164 28 146C34 128 54 126 68 146C78 160 80 184 70 200Z"
+          {...ink}
+        />
+        <path
+          d="M58 176C50 148 46 108 56 86C64 68 82 70 86 90C90 114 84 152 78 176Z"
+          {...ink}
+        />
+        <path
+          d="M90 170C84 128 86 74 100 52C112 34 130 40 130 60C130 92 122 142 116 172Z"
+          {...ink}
+        />
+        <path
+          d="M124 168C120 112 126 52 142 30C156 12 174 20 172 44C170 80 160 136 154 170Z"
+          {...ink}
+        />
+        <path
+          d="M162 172C166 128 178 78 194 58C206 42 224 52 218 74C210 106 196 148 188 174Z"
+          {...ink}
         />
       </svg>
     </div>
