@@ -52,7 +52,7 @@ export function HomeSketch() {
           className={`home-bubble ${bubble.area}`}
         >
           <span className="home-bubble-ink">
-            <svg viewBox="0 0 200 124" aria-hidden="true" className="h-auto w-full">
+            <svg viewBox="0 0 200 124" aria-hidden="true" className="home-bubble-shape">
               <path
                 d={bubble.path}
                 fill="color-mix(in srgb, var(--paper) 72%, white)"
@@ -65,8 +65,12 @@ export function HomeSketch() {
           </span>
         </Link>
       ))}
-      <SmileyFace />
-      <WavingHand />
+      <div className="area-face">
+        <div className="face-lockup">
+          <SmileyFace />
+          <WavingHand />
+        </div>
+      </div>
       <StickDoodle />
     </div>
   );
@@ -166,13 +170,12 @@ function SmileyFace() {
   }, []);
 
   return (
-    <div className="area-face">
-      <svg
-        ref={svgRef}
-        viewBox="0 0 360 400"
-        aria-hidden="true"
-        className="h-auto w-full"
-      >
+    <svg
+      ref={svgRef}
+      viewBox="0 0 360 400"
+      aria-hidden="true"
+      className="face-svg"
+    >
         <g ref={faceRef} fill="none" stroke="currentColor" strokeLinecap="round">
           <path
             d="M180 36C246 28 308 72 326 138C346 210 328 292 268 338C214 380 118 372 68 312C16 250 24 142 78 84C114 46 132 40 180 36Z"
@@ -198,9 +201,8 @@ function SmileyFace() {
             <circle cx="228" cy="162" r="3" fill="#f4efe2" stroke="none" />
           </g>
           <path d="M112 214C142 272 226 270 252 208" strokeWidth="3.2" />
-        </g>
-      </svg>
-    </div>
+      </g>
+    </svg>
   );
 }
 
