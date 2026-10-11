@@ -4,7 +4,19 @@ import Link from "next/link";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import {
   ASSET_BASE,
+  BOSS_BAR_HEIGHT,
+  BOSS_BAR_TOP,
+  BOSS_BAR_WIDTH,
+  BOSS_NAME_GAP,
+  BOSS_NAME_LINE,
   BOSS_SPRITE_FILE,
+  HUD_INSET_TOP,
+  HUD_INSET_X,
+  HUD_LEVEL_LINE,
+  HUD_RIGHT_RESERVE,
+  HUD_ROW_GAP,
+  HUD_STATUS_LINE,
+  HUD_TIP_LINE,
   KEY_ACTIONS,
   MUSIC_FILE,
   SANDBOX_WEAPON_CHOICES,
@@ -22,6 +34,78 @@ type Frame = {
 
 const BTN =
   "cursor-pointer bg-[#e5e7eb] px-3 py-1.5 text-center text-sm text-black disabled:cursor-not-allowed disabled:opacity-40";
+
+const MIN_HUD_SCALE = 0.72;
+
+function HudLine({
+  text,
+  className,
+  height,
+}: {
+  text: string;
+  className: string;
+  height: number;
+}) {
+  const boxRef = useRef<HTMLParagraphElement>(null);
+  const measureRef = useRef<HTMLSpanElement>(null);
+  const [fit, setFit] = useState({ scale: 1, ellipsis: false });
+
+  useLayoutEffect(() => {
+    const box = boxRef.current;
+    const measure = measureRef.current;
+    if (!box || !measure) {
+      return;
+    }
+    const available = box.clientWidth;
+    const needed = measure.scrollWidth;
+    if (available <= 0 || needed <= 0) {
+      return;
+    }
+    const next =
+      needed <= available + 0.5
+        ? { scale: 1, ellipsis: false }
+        : needed * MIN_HUD_SCALE <= available + 0.5
+          ? { scale: Math.round((available / needed) * 1000) / 1000, ellipsis: false }
+          : { scale: MIN_HUD_SCALE, ellipsis: true };
+    setFit((current) =>
+      current.ellipsis === next.ellipsis && current.scale === next.scale ? current : next,
+    );
+  }, [text]);
+
+  return (
+    <p
+      ref={boxRef}
+      className={`relative overflow-hidden ${className}`}
+      style={{ height, lineHeight: `${height}px` }}
+    >
+      <span
+        ref={measureRef}
+        aria-hidden="true"
+        className="pointer-events-none invisible absolute top-0 left-0 whitespace-pre"
+      >
+        {text}
+      </span>
+      <span
+        className="inline-block bg-[#0b1020] whitespace-pre"
+        style={{
+          lineHeight: `${height}px`,
+          transform: fit.scale < 0.999 ? `scale(${fit.scale})` : undefined,
+          transformOrigin: "left center",
+          ...(fit.ellipsis
+            ? {
+                display: "block",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                maxWidth: `${100 / fit.scale}%`,
+              }
+            : null),
+        }}
+      >
+        {text}
+      </span>
+    </p>
+  );
+}
 
 function isTypingTarget(target: EventTarget | null) {
   return (
@@ -334,17 +418,45 @@ export function DuelGame() {
           />
 
           {view.showHud ? (
-            <div className="pointer-events-none absolute top-3 left-3 max-w-[760px]">
-              <p className="text-sm font-bold text-white">{view.hud}</p>
-              <p className="mt-1 text-[11px] font-bold text-[#e5e7eb]">{view.level}</p>
-              <p className="mt-1 text-[10px] text-[#cbd5e1]">{view.tip}</p>
+            <div
+              className="pointer-events-none absolute flex flex-col"
+              style={{
+                top: HUD_INSET_TOP,
+                left: HUD_INSET_X,
+                right: HUD_RIGHT_RESERVE,
+                gap: HUD_ROW_GAP,
+              }}
+            >
+              <HudLine text={view.hud} className="text-sm font-bold text-white" height={HUD_STATUS_LINE} />
+              <HudLine
+                text={view.level}
+                className="text-[11px] font-bold text-[#e5e7eb]"
+                height={HUD_LEVEL_LINE}
+              />
+              <HudLine text={view.tip} className="text-[10px] text-[#cbd5e1]" height={HUD_TIP_LINE} />
             </div>
           ) : null}
 
           {view.bossBar.visible ? (
-            <div className="pointer-events-none absolute top-3 left-1/2 w-[520px] -translate-x-1/2">
-              <p className="text-xs font-bold text-[#fecdd3]">{view.bossBar.name}</p>
-              <div className="mt-1 h-[18px] w-[520px] border-2 border-[#334155] bg-[#111827]">
+            <div
+              className="pointer-events-none absolute"
+              style={{
+                top: BOSS_BAR_TOP,
+                left: "50%",
+                width: BOSS_BAR_WIDTH,
+                transform: "translateX(-50%)",
+              }}
+            >
+              <p
+                className="truncate font-bold text-[#fecdd3]"
+                style={{ height: BOSS_NAME_LINE, lineHeight: `${BOSS_NAME_LINE}px`, fontSize: 12 }}
+              >
+                {view.bossBar.name}
+              </p>
+              <div
+                className="border-2 border-[#334155] bg-[#111827]"
+                style={{ marginTop: BOSS_NAME_GAP, height: BOSS_BAR_HEIGHT, width: BOSS_BAR_WIDTH }}
+              >
                 <div
                   className="mt-px ml-px h-2.5 bg-[#fb7185]"
                   style={{ width: `${Math.max(0, view.bossBar.frac) * 508}px` }}
@@ -360,7 +472,7 @@ export function DuelGame() {
                 game.toggleShop();
                 publish();
               }}
-              className={`${BTN} absolute top-2.5 right-2.5 px-3 py-1.5`}
+              className={`${BTN} absolute top-2.5 right-2.5 z-10 px-3 py-1.5`}
             >
               Shop
             </button>
@@ -413,14 +525,6 @@ export function DuelGame() {
                     onChange={(event) => setOption(() => { game.setShowArrow(event.target.checked); })}
                   />
                   Show direction arrow
-                </label>
-                <label className="flex items-center gap-2 py-1.5 text-sm text-white">
-                  <input
-                    type="checkbox"
-                    checked={view.showWeaponSprites}
-                    onChange={(event) => setOption(() => { game.setShowWeaponSprites(event.target.checked); })}
-                  />
-                  Show weapon sprites
                 </label>
                 <label className="flex items-center gap-2 py-1.5 text-sm text-white">
                   <input
@@ -615,8 +719,13 @@ export function DuelGame() {
               className="absolute inset-0 z-20 flex flex-col bg-[#0f172a]"
             >
               <div className="flex items-center justify-between px-[18px] pt-3.5">
-                <p className="text-lg font-bold text-white">SHOP</p>
-                <p className="text-xs font-bold text-[#e5e7eb]">{view.shopMoneyLine}</p>
+                <p className="shrink-0 text-lg font-bold text-white">SHOP</p>
+                <p
+                  className="ml-4 min-w-0 overflow-hidden text-right text-xs font-bold text-[#e5e7eb]"
+                  style={{ whiteSpace: "pre", textOverflow: "ellipsis" }}
+                >
+                  {view.shopMoneyLine}
+                </p>
               </div>
               <div className="flex items-center gap-2.5 px-[18px] py-2.5">
                 <button type="button" className={BTN} onClick={() => { game.setShopTab("shop"); publish(); }}>

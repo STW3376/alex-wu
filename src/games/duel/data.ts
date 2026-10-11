@@ -3,6 +3,27 @@ import type { Rect } from "./geometry";
 export const WORLD_W = 980;
 export const WORLD_H = 640;
 
+/** Top-left HUD rows and the boss bar beneath them, in stage pixels. */
+export const HUD_INSET_X = 12;
+export const HUD_INSET_TOP = 12;
+/** Keeps every HUD line clear of the top-right Shop button. */
+export const HUD_RIGHT_RESERVE = 112;
+export const HUD_STATUS_LINE = 20;
+export const HUD_LEVEL_LINE = 16;
+export const HUD_TIP_LINE = 16;
+export const HUD_ROW_GAP = 6;
+export const HUD_BLOCK_BOTTOM =
+  HUD_INSET_TOP + HUD_STATUS_LINE + HUD_ROW_GAP + HUD_LEVEL_LINE + HUD_ROW_GAP + HUD_TIP_LINE;
+export const BOSS_BAR_GAP = 18;
+export const BOSS_BAR_TOP = HUD_BLOCK_BOTTOM + BOSS_BAR_GAP;
+export const BOSS_NAME_LINE = 16;
+export const BOSS_NAME_GAP = 4;
+export const BOSS_BAR_HEIGHT = 18;
+export const BOSS_BAR_WIDTH = 520;
+export const BOSS_BLOCK_BOTTOM = BOSS_BAR_TOP + BOSS_NAME_LINE + BOSS_NAME_GAP + BOSS_BAR_HEIGHT;
+/** Extra pixels so 12px combat text does not sit on the HUD or boss bar. */
+export const COMBAT_TEXT_PAD = 12;
+
 /**
  * Optional files. Python reads these from `assets/` next to duel.py.
  * The browser reads the same names from `public/games/duel/assets/`.

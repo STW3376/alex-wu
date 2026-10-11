@@ -1,8 +1,11 @@
 import {
   BORDER,
+  BOSS_BLOCK_BOTTOM,
   BOSS_SHOP_ITEMS,
   BOSS_SPRITE_ZOOM,
+  COMBAT_TEXT_PAD,
   DEFAULT_KEYBINDS,
+  HUD_BLOCK_BOTTOM,
   KEY_ACTIONS,
   KEY_ACTION_LABELS,
   LEVELS,
@@ -112,7 +115,6 @@ export type GameView = {
   showHud: boolean;
   aimByMouse: boolean;
   showArrow: boolean;
-  showWeaponSprites: boolean;
   musicEnabled: boolean;
   keybinds: { action: KeyAction; label: string; keyLabel: string; listening: boolean }[];
   sandbox: {
@@ -187,6 +189,12 @@ function nowSec() {
   return performance.now() / 1000;
 }
 
+function formatDollars(amount: number) {
+  const whole = Math.trunc(amount);
+  const sign = whole < 0 ? "-" : "";
+  return `${sign}$${Math.abs(whole).toLocaleString("en-US")}`;
+}
+
 function clampInt(value: string, lo: number, hi: number) {
   const parsed = Number.parseFloat(value);
   const v = Number.isFinite(parsed) ? Math.trunc(parsed) : lo;
@@ -209,7 +217,6 @@ export class DuelEngine {
 
   aimByMouse = false;
   showArrow = true;
-  showWeaponSprites = true;
   musicEnabled = true;
 
   mouseX = 0;
@@ -306,10 +313,6 @@ export class DuelEngine {
 
   setShowArrow(on: boolean) {
     this.showArrow = on;
-  }
-
-  setShowWeaponSprites(on: boolean) {
-    this.showWeaponSprites = on;
   }
 
   setMusicEnabled(on: boolean) {
@@ -644,6 +647,8 @@ export class DuelEngine {
     }
     const step = Math.min(Math.max(dt, 0), 0.05);
     if (this.gameOver || this.win) {
+      // Keep aging combat text after the round ends so a number cannot freeze on the HUD.
+      this.updateFloaters(step);
       return;
     }
 
@@ -767,7 +772,9 @@ export class DuelEngine {
     ctx.font = "bold 12px Helvetica, Arial, sans-serif";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
+    const combatClearance = this.combatTextClearance();
     for (const floater of this.floaters) {
+      if (floater.y < combatClearance) continue;
       ctx.fillStyle = floater.color;
       ctx.fillText(floater.text, floater.x, floater.y);
     }
@@ -800,7 +807,7 @@ export class DuelEngine {
     const weaponName = this.player
       ? (this.weapons[this.player.weaponKey]?.name ?? this.player.weaponKey)
       : "";
-    const moneyText = this.sandboxMode ? "INF" : `$${this.money}`;
+    const moneyText = this.sandboxMode ? "INF" : formatDollars(this.money);
     const bossAlive = Boolean(this.boss && this.boss.hp > 0);
     const frac = this.boss
       ? Math.max(0, Math.min(1, Math.max(0, this.boss.hp) / Math.max(1, this.boss.maxHp)))
@@ -819,7 +826,7 @@ export class DuelEngine {
       shopMoneyLine: `Money: ${moneyText}   Weapon: ${weaponName}`,
       shopItems: SHOP_ITEMS.map((item) => {
         const cost = this.sandboxMode ? 0 : this.effectiveCost(item);
-        const costText = this.sandboxMode ? "FREE" : cost === 0 ? "OWNED" : `$${cost}`;
+        const costText = this.sandboxMode ? "FREE" : cost === 0 ? "OWNED" : formatDollars(cost);
         return {
           key: item.key,
           name: item.name,
@@ -856,7 +863,6 @@ export class DuelEngine {
       showHud: this.screen === "game" && !this.shopOpen && this.player !== null,
       aimByMouse: this.aimByMouse,
       showArrow: this.showArrow,
-      showWeaponSprites: this.showWeaponSprites,
       musicEnabled: this.musicEnabled,
       keybinds: KEY_ACTIONS.map((action) => ({
         action,
@@ -1100,7 +1106,7 @@ export class DuelEngine {
       const level = this.levels[this.levelIndex];
       this.levelLine = `${level.name}   (Level ${this.levelIndex + 1}/${this.levels.length})`;
     }
-    const moneyText = this.sandboxMode ? "INF" : `$${this.money}`;
+    const moneyText = this.sandboxMode ? "INF" : formatDollars(this.money);
     let extra = "";
     if (player.weaponKey === "landmine") {
       const recharging = this.landmineRechargeQueue.length;
@@ -1691,12 +1697,19 @@ export class DuelEngine {
     this.lasers = this.lasers.filter((beam) => now - beam.born < beam.duration);
   }
 
+  private combatTextClearance() {
+    const bossAlive = Boolean(this.boss && this.boss.hp > 0 && this.screen === "game" && !this.shopOpen);
+    return (bossAlive ? BOSS_BLOCK_BOTTOM : HUD_BLOCK_BOTTOM) + COMBAT_TEXT_PAD;
+  }
+
   private updateFloaters(dt: number) {
     const now = nowSec();
+    const clearance = this.combatTextClearance();
     const next: Floater[] = [];
     for (const floater of this.floaters) {
       if (now - floater.born > 0.8) continue;
       floater.y -= 1.5 * (dt / 0.016);
+      if (floater.y < clearance) continue;
       next.push(floater);
     }
     this.floaters = next;
@@ -1917,7 +1930,6 @@ export class DuelEngine {
   }
 
   private drawWeaponSprite(ctx: CanvasRenderingContext2D, fighter: Fighter) {
-    if (!this.showWeaponSprites) return;
     const image = this.weaponSprites.get(fighter.weaponKey);
     if (!image || !image.complete || image.naturalWidth === 0) return;
     const [fx, fy] = norm(fighter.facingX, fighter.facingY, [1, 0]);

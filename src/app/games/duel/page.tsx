@@ -15,7 +15,7 @@ const controls = [
   ["N", "Next level, after the level is clear. On the last level, N starts over."],
   ["R", "Restart the current level. Money and upgrades stay."],
   ["Esc", "Pause. Esc again resumes. In the shop, Esc closes the shop."],
-  ["Settings", "Rebind keys, aim with the mouse, hide arrows or weapon sprites, and mute music."],
+  ["Settings", "Rebind keys, aim with the mouse, hide the direction arrow, and mute music."],
 ];
 
 export default function DuelPage() {
