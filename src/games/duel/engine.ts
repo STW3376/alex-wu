@@ -1871,9 +1871,15 @@ export class DuelEngine {
   private drawBoss(ctx: CanvasRenderingContext2D, boss: Fighter) {
     const image = boss.spriteKey === "level15" ? this.bossSprite : null;
     if (image && image.complete && image.naturalWidth > 0) {
+      // PhotoImage.zoom(4, 4) replicates pixels and create_image anchors at center.
       const w = image.naturalWidth * BOSS_SPRITE_ZOOM;
       const h = image.naturalHeight * BOSS_SPRITE_ZOOM;
-      ctx.drawImage(image, boss.x - w / 2, boss.y - h / 2, w, h);
+      const left = Math.round(boss.x - w / 2);
+      const top = Math.round(boss.y - h / 2);
+      ctx.save();
+      ctx.imageSmoothingEnabled = false;
+      ctx.drawImage(image, left, top, w, h);
+      ctx.restore();
     } else {
       ctx.beginPath();
       ctx.arc(boss.x, boss.y, boss.r, 0, Math.PI * 2);
