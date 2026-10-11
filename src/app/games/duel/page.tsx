@@ -9,11 +9,13 @@ export const metadata: Metadata = {
 };
 
 const controls = [
-  ["Arrow keys", "Move. You aim the way you last moved."],
-  ["F", "Attack with the equipped weapon."],
-  ["S", "Open or close the shop."],
+  ["W, A, S, D", "Move. You aim the way you last moved."],
+  ["Hold Space", "Attack with the equipped weapon."],
+  ["Shop", "Open or close the shop. Owned weapons stay free."],
   ["N", "Next level, after the level is clear. On the last level, N starts over."],
   ["R", "Restart the current level. Money and upgrades stay."],
+  ["Esc", "Pause. Esc again resumes. In the shop, Esc closes the shop."],
+  ["Settings", "Rebind keys, aim with the mouse, hide arrows or weapon sprites, and mute music."],
 ];
 
 export default function DuelPage() {

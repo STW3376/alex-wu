@@ -3,6 +3,46 @@ import type { Rect } from "./geometry";
 export const WORLD_W = 980;
 export const WORLD_H = 640;
 
+/**
+ * Optional files. Python reads these from `assets/` next to duel.py.
+ * The browser reads the same names from `public/games/duel/assets/`.
+ * If a file is missing, drawing falls back the way Tkinter does.
+ *
+ *   boss15.png
+ *   pistol.png
+ *   rifle.png
+ *   blaster.png
+ *   rocket_launcher.png
+ *   sword.png
+ *   claws.png
+ *   music.mp3
+ */
+export const ASSET_BASE = "/games/duel/assets";
+
+export const WEAPON_SPRITE_FILES: Record<string, string> = {
+  pistol: "pistol.png",
+  rifle: "rifle.png",
+  blaster: "blaster.png",
+  rocket_launcher: "rocket_launcher.png",
+  sword: "sword.png",
+  claws: "claws.png",
+};
+
+export const BOSS_SPRITE_FILE = "boss15.png";
+export const MUSIC_FILE = "music.mp3";
+
+export const WEAPON_SCALE = 0.12;
+export const WEAPON_SCALE_BY_KEY: Record<string, number> = {
+  pistol: 1,
+  rifle: 0.95,
+  blaster: 0.95,
+  rocket_launcher: 0.85,
+  sword: 0.95,
+  claws: 0.95,
+};
+export const WEAPON_ANGLE_STEP = 6;
+export const BOSS_SPRITE_ZOOM = 4;
+
 export type WeaponKind = "gun" | "melee";
 
 export type Weapon = {
@@ -35,6 +75,11 @@ export type LevelDef = {
   enemySpeed: number;
   enemyShield: number;
   enemyWeaponPool: readonly string[];
+  bossSpawn: readonly [number, number] | null;
+  bossHp: number;
+  bossSpeed: number;
+  bossShield: number;
+  bossWeapon: string;
 };
 
 const gun = (
@@ -79,14 +124,9 @@ const melee = (
   aoeDamage: 0,
 });
 
-/**
- * Keyed by Weapon.key. The Tkinter file inserts the rocket under
- * "rocket launcher" (with a space) while the purchase handler and every
- * lookup use "rocket_launcher", which raises KeyError after you buy it.
- */
 export const WEAPONS: Record<string, Weapon> = {
   pistol: gun("pistol", "Pistol", 12, 0.18, 560),
-  rifle: gun("rifle", "Rifle", 9, 0.5, 710),
+  rifle: gun("rifle", "Rifle", 9, 0.09, 710),
   shotgun: gun("shotgun", "Shotgun", 20, 0.42, 510, {
     pelletCount: 5,
     spreadDeg: 18,
@@ -97,20 +137,26 @@ export const WEAPONS: Record<string, Weapon> = {
     aoeRadius: 90,
     aoeDamage: 25,
   }),
+  minigun: gun("minigun", "Minigun", 15, 0.03, 1000),
+  railcannon: gun("railcannon", "Railcannon", 100, 0.55, 0, {
+    aoeRadius: 150,
+    aoeDamage: 50,
+  }),
   blaster: gun("blaster", "Blaster", 10, 0.16, 600, {
     aoeRadius: 85,
     aoeDamage: 8,
   }),
+  chunkier_gun: gun("chunkier_gun", "ChunkierGun", 99, 0.77, 450, {
+    aoeRadius: 100,
+    aoeDamage: 49,
+  }),
+  pukeko: gun("pukeko", "Pukeko", 200, 0.66, 490.2),
+  landmine: gun("landmine", "Landmine", 500, 0.15, 0),
 };
 
 export const SHOP_ITEMS: readonly ShopItem[] = [
   { key: "buy_pistol", name: "Equip: Pistol", desc: "Balanced shots.", cost: 0 },
-  {
-    key: "buy_rifle",
-    name: "Equip: Rifle",
-    desc: "Fast fire, lower damage.",
-    cost: 250,
-  },
+  { key: "buy_rifle", name: "Equip: Rifle", desc: "Fast fire, lower damage.", cost: 250 },
   {
     key: "buy_shotgun",
     name: "Equip: Shotgun",
@@ -131,9 +177,23 @@ export const SHOP_ITEMS: readonly ShopItem[] = [
   },
   {
     key: "buy_rocket_launcher",
-    name: "equip: Rocket Launcher",
-    desc: "big damage!!!!!!111 yay!!11 has splash dmg",
+    name: "Equip: Rocket Launcher",
+    desc: "Big damage, splash hits.",
     cost: 1000,
+  },
+  { key: "buy_minigun", name: "Equip: Minigun", desc: "Very fast fire.", cost: 1200 },
+  {
+    key: "buy_railcannon",
+    name: "Equip: Railcannon",
+    desc: "IS THAT AN ULTRAKILL REFERENCE",
+    cost: 2500,
+  },
+  { key: "buy_claws", name: "Equip: Claws", desc: "Stronger melee.", cost: 500 },
+  {
+    key: "buy_landmine",
+    name: "Equip: Landmine",
+    desc: "Place up to 3 mines. 500 dmg. 15s recharge after explosion.",
+    cost: 900,
   },
   { key: "hp_up", name: "Max HP +20", desc: "More health capacity.", cost: 220 },
   {
@@ -142,23 +202,55 @@ export const SHOP_ITEMS: readonly ShopItem[] = [
     desc: "Shield absorbs hits first.",
     cost: 260,
   },
+  { key: "speed_up", name: "Move Speed +25", desc: "Dodge more easily.", cost: 280 },
+  { key: "heal", name: "Heal to Full", desc: "Restore HP and shield.", cost: 160 },
+];
+
+export const BOSS_SHOP_ITEMS: readonly ShopItem[] = [
   {
-    key: "speed_up",
-    name: "Move Speed +25",
-    desc: "Dodge more easily.",
-    cost: 280,
+    key: "equip_chunkier_gun",
+    name: "Equip: ChunkierGun",
+    desc: "Unlocked by beating Level 10 boss.",
+    cost: 0,
   },
-  { key: "claws", name: "equip: claws", desc: "a stronger melee", cost: 500 },
   {
-    key: "heal",
-    name: "Heal to Full",
-    desc: "Restore HP and shield.",
-    cost: 160,
+    key: "equip_pukeko",
+    name: "Equip: Pukeko",
+    desc: "Unlocked by beating Level 15 boss.",
+    cost: 0,
   },
 ];
 
+export const SANDBOX_WEAPON_CHOICES = [
+  "sandbox_custom",
+  "pistol",
+  "rifle",
+  "shotgun",
+  "sword",
+  "claws",
+  "rocket_launcher",
+  "minigun",
+  "railcannon",
+  "blaster",
+  "chunkier_gun",
+  "pukeko",
+  "landmine",
+] as const;
+
+const arena = (
+  partial: Omit<LevelDef, "bossSpawn" | "bossHp" | "bossSpeed" | "bossShield" | "bossWeapon"> &
+    Partial<Pick<LevelDef, "bossSpawn" | "bossHp" | "bossSpeed" | "bossShield" | "bossWeapon">>,
+): LevelDef => ({
+  bossSpawn: null,
+  bossHp: 0,
+  bossSpeed: 0,
+  bossShield: 0,
+  bossWeapon: "rocket_launcher",
+  ...partial,
+});
+
 export const LEVELS: readonly LevelDef[] = [
-  {
+  arena({
     name: "Level 1: Yard",
     playerSpawn: [160, 320],
     enemySpawns: [[820, 320]],
@@ -171,8 +263,8 @@ export const LEVELS: readonly LevelDef[] = [
     enemySpeed: 110,
     enemyShield: 0,
     enemyWeaponPool: ["pistol", "claws"],
-  },
-  {
+  }),
+  arena({
     name: "Level 2: Crossfire",
     playerSpawn: [150, 120],
     enemySpawns: [
@@ -189,9 +281,9 @@ export const LEVELS: readonly LevelDef[] = [
     enemyHp: 140,
     enemySpeed: 125,
     enemyShield: 10,
-    enemyWeaponPool: ["pistol", "blaster", "claws"],
-  },
-  {
+    enemyWeaponPool: ["rifle", "claws"],
+  }),
+  arena({
     name: "Level 3: The Box",
     playerSpawn: [140, 320],
     enemySpawns: [
@@ -210,7 +302,256 @@ export const LEVELS: readonly LevelDef[] = [
     enemySpeed: 145,
     enemyShield: 18,
     enemyWeaponPool: ["rifle", "shotgun", "claws", "blaster"],
-  },
+  }),
+  arena({
+    name: "Level 4: Tube",
+    playerSpawn: [140, 320],
+    enemySpawns: [
+      [840, 320],
+      [760, 220],
+      [760, 420],
+      [900, 320],
+    ],
+    walls: [
+      { x: 200, y: 260, w: 290, h: 40 },
+      { x: 490, y: 0, w: 200, h: 300 },
+      { x: 200, y: 490, w: 200, h: 150 },
+      { x: 400, y: 490, w: 290, h: 40 },
+    ],
+    enemyHp: 180,
+    enemySpeed: 145,
+    enemyShield: 18,
+    enemyWeaponPool: ["rifle", "shotgun", "claws", "blaster", "minigun", "blaster"],
+  }),
+  arena({
+    name: "Level 5: chunky man",
+    playerSpawn: [140, 320],
+    enemySpawns: [],
+    walls: [],
+    enemyHp: 0,
+    enemySpeed: 0,
+    enemyShield: 0,
+    enemyWeaponPool: [],
+    bossSpawn: [820, 320],
+    bossHp: 2500,
+    bossSpeed: 125,
+    bossShield: 100,
+    bossWeapon: "rocket_launcher",
+  }),
+  arena({
+    name: "Level 6: Zigzag Hall",
+    playerSpawn: [140, 320],
+    enemySpawns: [
+      [860, 120],
+      [860, 520],
+      [740, 320],
+    ],
+    walls: [
+      { x: 260, y: 80, w: 40, h: 480 },
+      { x: 420, y: 0, w: 40, h: 360 },
+      { x: 420, y: 440, w: 40, h: 200 },
+      { x: 580, y: 80, w: 40, h: 480 },
+      { x: 740, y: 0, w: 40, h: 360 },
+      { x: 740, y: 440, w: 40, h: 200 },
+      { x: 320, y: 280, w: 160, h: 40 },
+      { x: 520, y: 320, w: 160, h: 40 },
+    ],
+    enemyHp: 200,
+    enemySpeed: 155,
+    enemyShield: 22,
+    enemyWeaponPool: ["rifle", "rifle", "shotgun", "claws", "blaster"],
+  }),
+  arena({
+    name: "Level 7: Four Rooms",
+    playerSpawn: [140, 200],
+    enemySpawns: [
+      [840, 120],
+      [840, 520],
+      [520, 120],
+      [520, 520],
+    ],
+    walls: [
+      { x: 460, y: 0, w: 40, h: 260 },
+      { x: 460, y: 380, w: 40, h: 260 },
+      { x: 0, y: 300, w: 440, h: 40 },
+      { x: 540, y: 300, w: 440, h: 40 },
+      { x: 220, y: 140, w: 80, h: 40 },
+      { x: 680, y: 460, w: 80, h: 40 },
+      { x: 680, y: 140, w: 80, h: 40 },
+      { x: 220, y: 460, w: 80, h: 40 },
+    ],
+    enemyHp: 215,
+    enemySpeed: 160,
+    enemyShield: 26,
+    enemyWeaponPool: ["shotgun", "shotgun", "rifle", "claws", "blaster"],
+  }),
+  arena({
+    name: "Level 8: Center Pit",
+    playerSpawn: [140, 320],
+    enemySpawns: [
+      [880, 320],
+      [760, 160],
+      [760, 480],
+      [800, 320],
+    ],
+    walls: [
+      { x: 390, y: 170, w: 200, h: 40 },
+      { x: 390, y: 430, w: 200, h: 40 },
+      { x: 350, y: 210, w: 40, h: 220 },
+      { x: 600, y: 210, w: 40, h: 220 },
+      { x: 220, y: 120, w: 60, h: 120 },
+      { x: 220, y: 400, w: 60, h: 120 },
+      { x: 760, y: 260, w: 60, h: 120 },
+    ],
+    enemyHp: 235,
+    enemySpeed: 170,
+    enemyShield: 30,
+    enemyWeaponPool: ["minigun", "rifle", "shotgun", "blaster", "claws"],
+  }),
+  arena({
+    name: "Level 9: Long Bridge",
+    playerSpawn: [120, 320],
+    enemySpawns: [
+      [900, 320],
+      [760, 320],
+      [820, 200],
+      [820, 440],
+    ],
+    walls: [
+      { x: 220, y: 180, w: 560, h: 40 },
+      { x: 220, y: 420, w: 560, h: 40 },
+      { x: 480, y: 220, w: 40, h: 200 },
+      { x: 620, y: 220, w: 40, h: 200 },
+      { x: 140, y: 260, w: 60, h: 120 },
+    ],
+    enemyHp: 255,
+    enemySpeed: 175,
+    enemyShield: 34,
+    enemyWeaponPool: ["rifle", "rifle", "minigun", "shotgun", "blaster"],
+  }),
+  arena({
+    name: "Level 10: chunkier man",
+    playerSpawn: [140, 320],
+    enemySpawns: [],
+    walls: [],
+    enemyHp: 0,
+    enemySpeed: 0,
+    enemyShield: 0,
+    enemyWeaponPool: [],
+    bossSpawn: [820, 320],
+    bossHp: 5000,
+    bossSpeed: 125,
+    bossShield: 200,
+    bossWeapon: "chunkier_gun",
+  }),
+  arena({
+    name: "Level 11: The Funnel",
+    playerSpawn: [140, 320],
+    enemySpawns: [
+      [900, 120],
+      [900, 520],
+      [780, 320],
+      [620, 320],
+    ],
+    walls: [
+      { x: 260, y: 80, w: 40, h: 480 },
+      { x: 420, y: 120, w: 40, h: 400 },
+      { x: 580, y: 160, w: 40, h: 320 },
+      { x: 740, y: 200, w: 40, h: 240 },
+      { x: 320, y: 260, w: 120, h: 40 },
+      { x: 500, y: 340, w: 120, h: 40 },
+      { x: 660, y: 260, w: 120, h: 40 },
+    ],
+    enemyHp: 290,
+    enemySpeed: 185,
+    enemyShield: 45,
+    enemyWeaponPool: ["minigun", "minigun", "rifle", "blaster", "shotgun"],
+  }),
+  arena({
+    name: "Level 12: Offset Lanes",
+    playerSpawn: [140, 120],
+    enemySpawns: [
+      [900, 520],
+      [780, 520],
+      [900, 200],
+      [660, 360],
+    ],
+    walls: [
+      { x: 220, y: 160, w: 700, h: 40 },
+      { x: 220, y: 440, w: 700, h: 40 },
+      { x: 340, y: 200, w: 40, h: 160 },
+      { x: 540, y: 280, w: 40, h: 160 },
+      { x: 740, y: 200, w: 40, h: 160 },
+      { x: 140, y: 200, w: 80, h: 80 },
+    ],
+    enemyHp: 305,
+    enemySpeed: 190,
+    enemyShield: 50,
+    enemyWeaponPool: ["rifle", "minigun", "shotgun", "blaster", "claws"],
+  }),
+  arena({
+    name: "Level 13: Checkers",
+    playerSpawn: [140, 320],
+    enemySpawns: [
+      [900, 320],
+      [780, 160],
+      [780, 480],
+      [620, 240],
+      [620, 400],
+    ],
+    walls: [
+      { x: 280, y: 120, w: 80, h: 80 },
+      { x: 420, y: 240, w: 80, h: 80 },
+      { x: 560, y: 120, w: 80, h: 80 },
+      { x: 700, y: 240, w: 80, h: 80 },
+      { x: 280, y: 360, w: 80, h: 80 },
+      { x: 560, y: 360, w: 80, h: 80 },
+      { x: 700, y: 440, w: 80, h: 80 },
+    ],
+    enemyHp: 320,
+    enemySpeed: 195,
+    enemyShield: 55,
+    enemyWeaponPool: ["blaster", "blaster", "minigun", "rifle", "shotgun"],
+  }),
+  arena({
+    name: "Level 14: Spiral",
+    playerSpawn: [140, 320],
+    enemySpawns: [
+      [900, 320],
+      [820, 160],
+      [820, 480],
+      [700, 320],
+    ],
+    walls: [
+      { x: 260, y: 80, w: 520, h: 40 },
+      { x: 740, y: 120, w: 40, h: 440 },
+      { x: 300, y: 520, w: 480, h: 40 },
+      { x: 260, y: 160, w: 40, h: 360 },
+      { x: 340, y: 160, w: 360, h: 40 },
+      { x: 660, y: 240, w: 40, h: 240 },
+      { x: 420, y: 400, w: 240, h: 40 },
+      { x: 520, y: 280, w: 80, h: 40 },
+    ],
+    enemyHp: 340,
+    enemySpeed: 205,
+    enemyShield: 60,
+    enemyWeaponPool: ["minigun", "railcannon", "shotgun", "blaster", "rifle"],
+  }),
+  arena({
+    name: "Level 15: pukeko",
+    playerSpawn: [140, 320],
+    enemySpawns: [],
+    walls: [],
+    enemyHp: 0,
+    enemySpeed: 0,
+    enemyShield: 0,
+    enemyWeaponPool: [],
+    bossSpawn: [820, 320],
+    bossHp: 10000,
+    bossSpeed: 125,
+    bossShield: 400,
+    bossWeapon: "pukeko",
+  }),
 ];
 
 export const BORDER: readonly Rect[] = [
@@ -243,3 +584,66 @@ export const STARFIELD: readonly (readonly [number, number, number])[] = [
   [444, 425, 2], [795, 454, 1], [643, 200, 2], [309, 490, 1], [121, 571, 1], [380, 166, 1],
   [723, 152, 1], [506, 346, 1], [554, 4, 2], [172, 5, 2], [319, 123, 2], [113, 498, 2],
 ];
+
+export const KEY_ACTIONS = [
+  "move_up",
+  "move_left",
+  "move_down",
+  "move_right",
+  "attack",
+  "restart",
+  "next_level",
+  "menu",
+] as const;
+
+export type KeyAction = (typeof KEY_ACTIONS)[number];
+
+export const KEY_ACTION_LABELS: Record<KeyAction, string> = {
+  move_up: "Move Up",
+  move_left: "Move Left",
+  move_down: "Move Down",
+  move_right: "Move Right",
+  attack: "Attack",
+  restart: "Restart",
+  next_level: "Next Level",
+  menu: "Menu / Pause",
+};
+
+export const DEFAULT_KEYBINDS: Record<KeyAction, string> = {
+  move_up: "w",
+  move_left: "a",
+  move_down: "s",
+  move_right: "d",
+  attack: "space",
+  restart: "r",
+  next_level: "n",
+  menu: "escape",
+};
+
+const KEY_SPECIALS: Record<string, string> = {
+  space: "Space",
+  escape: "Esc",
+  left: "Left",
+  right: "Right",
+  up: "Up",
+  down: "Down",
+  return: "Enter",
+  backspace: "Backspace",
+  tab: "Tab",
+};
+
+export function prettyKey(key: string) {
+  return KEY_SPECIALS[key] ?? key.toUpperCase();
+}
+
+export function tipText(keybinds: Record<KeyAction, string>) {
+  const move = `${prettyKey(keybinds.move_up)}/${prettyKey(keybinds.move_left)}/${prettyKey(keybinds.move_down)}/${prettyKey(keybinds.move_right)}`;
+  return (
+    `Move: ${move} | ` +
+    `Attack: Hold ${prettyKey(keybinds.attack)} | ` +
+    `Shop: Button | ` +
+    `Next level: ${prettyKey(keybinds.next_level)} | ` +
+    `Restart: ${prettyKey(keybinds.restart)} | ` +
+    `Main Menu: ${prettyKey(keybinds.menu)}`
+  );
+}
