@@ -106,3 +106,9 @@ No home address, school name, contact form, or child’s email. The footer says:
 | `npm run db:migrate` | Apply migrations to Neon |
 | `npm run db:seed` | Upsert the four real catalog pieces |
 | `npm run db:set-admin-passwords` | Hash `ADMIN_TED_PASSWORD` / `ADMIN_ALEX_PASSWORD` (or CLI args) and store them in Neon |
+
+## Credits
+
+- **Alex Wu**: artist, animator, musician, and game maker. Every piece on the site is his.
+- **Ted Wu** ([@STW3376](https://github.com/STW3376)): site owner.
+- **Richard Y** ([@ryuan2003](https://github.com/ryuan2003), Ryuan2003@gmail.com): co-author and Alex's tutor.
